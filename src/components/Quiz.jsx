@@ -19,9 +19,9 @@ export default function Quiz(props) {
   }
 
   return (
-    <section className='sm:w-[650px] h-[450px] flex flex-col justify-between min-w-full max-w-xl h-full max-h-xl '>
-      <h1 className="sm:text-xl md:text-2xl lg:text-3xl mb-2">{question}</h1>
-      <div className="flex flex-col w-full options space-y-4">
+    <section className='flex flex-col justify-between h-[80%]'>
+      <h1 className="sm:text-xl md:text-2xl lg:text-3xl mb-4">{question}</h1>
+      <div className="flex flex-col w-full space-y-4">
         {answers.map((item, index) => {
           const style = optionStyle(item);
           return (
@@ -30,7 +30,7 @@ export default function Quiz(props) {
               key={index}
               value={item}
               onClick={() => select(item)}
-              className={`py-2 px-4 lg:w-full sm:w-[300px] text-left rounded-full transition ${style}`}
+              className={`py-4 px-4 lg:w-full sm:w-[650px] text-left rounded-md transition ${style}`}
             />
           );
         })}

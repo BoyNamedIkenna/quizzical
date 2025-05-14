@@ -16,4 +16,7 @@ export const Props = {
   next: PropTypes.func.isRequired,
   prev: PropTypes.func.isRequired,
   button: PropTypes.element.isRequired,
+  startIndex: PropTypes.number,
+  setStartIndex: PropTypes.func,
+  windowSize: PropTypes.number,
 };

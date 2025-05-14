@@ -3,7 +3,11 @@
 @tailwind components;
 @tailwind utilities;
 body{
-  @apply bg-neutral-950 min-h-screen ;
+  @apply min-h-screen ;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #121212;
 }
 
 /* Hide number input arrows in all browsers */

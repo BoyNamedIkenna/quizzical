@@ -15,7 +15,10 @@ function App() {
   const [correctAnswers, setCorrectAnswers] = useSessionStorage("correctAnswers", []);
   const [checked, setChecked] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  
+  const [startIndex, setStartIndex] = useState(0);
+  const [windowSize, setWindowSize] = useState(10);
+
+
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     async function fetchQuizData() {
@@ -46,6 +49,22 @@ function App() {
     }
     fetchQuizData();
   }, [url]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize(window.innerWidth < 640 ? 5 : 10);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const newStartIndex = Math.floor(currentIndex / windowSize) * windowSize;
+    setStartIndex(newStartIndex);
+  }, [currentIndex, windowSize]);
+
+
   /* eslint-enable react-hooks/exhaustive-deps */
 
   function startGame(apiUrl) {
@@ -60,7 +79,7 @@ function App() {
     setCorrectAnswers([]);
     setUrl("");
     setChecked(false)
-    setLoading(false);  
+    setLoading(false);
   }
 
   function selectAnswer(quizIndex, answer) {
@@ -116,17 +135,41 @@ function App() {
   if (loading) return <div className='text-white'>Loading quiz...</div>;
   if (!data.length) return <Start start={startGame} />;
 
+  const numAnswered = selectedAnswers.filter(a => a !== null).length;
+  const percentage = (numAnswered / data.length) * 100;
   return (
-    <section className="text-[#E0E0E0] bg-neutral-950 p-6 sm:p-6 w-full max-w-6xl min-h-screen flex flex-col space-y-4 mx-auto">
-      <p>{currentIndex + 1}/{data.length}</p>
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start">
-        {quizzes[currentIndex]}
+    <section className="text-[#E0E0E0] bg-zinc-900 p-4 lg:p-5 w-screen flex flex-col justify-between space-y-4 lg:w-[800px] max-w-full min-h-[630px]">
+
+      {/* Header: progress info */}
+      <div className='flex justify-between'>
+        <p>Question {currentIndex + 1} of {data.length}</p>
+        <p>{numAnswered} of {data.length} answered</p>
+      </div>
+
+      {/* Progress bar */}
+      <div className="w-full h-2 bg-gray-700 rounded-full">
+        <div
+          className="h-full bg-blue-500 rounded-full transition-all duration-300"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+
+      {/* Question content */}
+      <div className="flex-grow flex items-start">
+        <div className="w-full">{quizzes[currentIndex]}</div>
+      </div>
+
+      {/* Footer: Question buttons + nav buttons */}
+      <div className="flex flex-col gap-4 sm:gap-6">
         <Questions
           data={data}
           currentQuestion={currentQuestion}
+          currentIndex={currentIndex}
+          startIndex={startIndex}
+          setStartIndex={setStartIndex}
+          windowSize={windowSize}
         />
-      </div>
-      <div className='mt-auto'>
+
         <Buttons
           next={nextQuestion}
           prev={prevQuestion}
@@ -134,13 +177,15 @@ function App() {
             <input
               type="button"
               value={checked ? "New Game" : "Submit"}
-              className="bg-blue-800 px-4 rounded-lg"
+              className="bg-blue-800 text-white dark:text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
               onClick={checked ? newGame : correctAnswer}
             />
           }
         />
       </div>
+
     </section>
+
   );
 }
 
