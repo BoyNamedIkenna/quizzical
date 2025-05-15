@@ -10,7 +10,9 @@ export default function Start({ start }) {
     const [selectedDifficulty, setSelectedDifficulty] = useState("");
     const [type, setType] = useState(["Multiple Choice", "True / False"]);
     const [selectedType, setSelectedType] = useState("");
-    const [number, setNumber] = useState(10)
+    const [number, setNumber] = useState(10);
+    const [warning, setWarning] = useState("");
+
 
 
     useEffect(() => {
@@ -40,11 +42,22 @@ export default function Start({ start }) {
     }
 
     const handleNumberChange = (e) => {
-        setNumber(e.target.value);
-    }
+        const value = parseInt(e.target.value);
+        setNumber(value);
+
+        if (value > 50) {
+            setWarning("The maximum number of questions is 50.");
+        } else if (value < 1 || isNaN(value)) {
+            setWarning("You must select at least 1 question.");
+        } else {
+            setWarning("");
+        }
+    };
 
 
     const handleSubmit = () => {
+        if (warning) return;
+
         let apiUrl = `https://opentdb.com/api.php?amount=${number}`;
         if (selectedCategory) {
             apiUrl += `&category=${selectedCategory}`;
@@ -54,18 +67,18 @@ export default function Start({ start }) {
             apiUrl += `&difficulty=${selectedDifficulty}`;
         }
 
-        if (selectedType == "Multiple Choice") {
+        if (selectedType === "Multiple Choice") {
             apiUrl += `&type=multiple`;
-        }
-        if (selectedType == "True / False") {
-            apiUrl += `&type=boolean`
+        } else if (selectedType === "True / False") {
+            apiUrl += `&type=boolean`;
         }
 
-        start(apiUrl)
+        start(apiUrl);
     };
 
-    const inputClass = "border rounded-lg py-3 px-3 my-4 bg-stone-900 border-indigo-600 text-white w-full focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-    const startPage =" mx-auto text-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg max-w-full border border-violet-900 font-bold  flex flex-col items-center w-full  max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-screen"
+
+    const inputClass = "rounded-lg py-3 px-3 my-4 text-white w-full bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200 ease-in-out"
+    const startPage = " mx-auto text-white p-4 sm:p-6 md:p-8 rounded-2xl bg-zinc-900 font-bold  flex flex-col items-center w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-screen"
 
 
     return (
@@ -82,8 +95,12 @@ export default function Start({ start }) {
                     max="50"
                     onChange={handleNumberChange}
                     value={number}
-                    className={`${inputClass} placeholder-gray-400 `}
+                    className={`${inputClass} text-gray-400`}
                 />
+                {warning && (
+                    <p className="text-red-500 text-sm font-semibold">{warning}</p>
+                )}
+
 
                 <label htmlFor="category" className="text-base sm:text-lg">Pick a category:</label>
                 <select
@@ -129,10 +146,14 @@ export default function Start({ start }) {
 
             <input
                 type="button"
-                className="mt-6 border rounded-lg py-3 px-4 bg-black border-indigo-600 text-white w-full sm:w-auto focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className={`mt-6 rounded-lg py-3 px-4 w-full sm:w-auto 
+        ${warning ? "bg-gray-500 cursor-not-allowed" : "bg-blue-800"} 
+        text-white transition duration-200`}
                 onClick={handleSubmit}
                 value="Start Quiz"
+                disabled={!!warning}
             />
+
         </div>
 
     )
