@@ -3,6 +3,7 @@ import Quiz from "./components/Quiz";
 import Start from './components/Start';
 import Buttons from './components/Buttons';
 import Questions from './components/Questions';
+import Modal from './components/modal';
 import useSessionStorage from './hooks/useSessionStorage';
 import { decodeHtmlEntity, shuffleArray } from './utils';
 
@@ -17,6 +18,8 @@ function App() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [startIndex, setStartIndex] = useState(0);
   const [windowSize, setWindowSize] = useState(10);
+  const [modalState, setModalState] = useState(false)
+
 
 
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -91,7 +94,11 @@ function App() {
   }
 
   function correctAnswer() {
-    if (!checked) {
+    if (!modalState) {
+      setModalState(true)
+    }
+    else {
+      setModalState(false)
       setCheckResults(selectedAnswers.map((answer, index) => data[index] && answer === data[index].correct_answer));
       setChecked(true)
     }
@@ -138,7 +145,7 @@ function App() {
   const numAnswered = selectedAnswers.filter(a => a !== null).length;
   const percentage = (numAnswered / data.length) * 100;
   return (
-    <section className="text-[#E0E0E0] bg-zinc-900 p-4 lg:p-5 w-screen flex flex-col justify-between space-y-4 lg:w-[800px] max-w-full min-h-[630px]">
+    <section className=" relative text-[#E0E0E0] bg-zinc-900 p-4 lg:p-5 w-screen flex flex-col justify-between space-y-4 lg:w-[800px] max-w-full min-h-[630px]">
 
       {/* Header: progress info */}
       <div className='flex justify-between'>
@@ -176,14 +183,18 @@ function App() {
           button={
             <input
               type="button"
-              value={checked ? "New Game" : "Submit"}
+              value={checked ? "New Game" : "End Quiz"}
               className="bg-blue-800 text-white dark:text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
               onClick={checked ? newGame : correctAnswer}
             />
           }
         />
+        {modalState && <Modal
+            correctAnswer={correctAnswer}
+            numAnswered={numAnswered}
+            totalNum={data.length}
+        />}
       </div>
-
     </section>
 
   );
